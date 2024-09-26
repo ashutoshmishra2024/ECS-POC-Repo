@@ -23,10 +23,10 @@ jobs:
       run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       
     - name: Build the Docker image
-      run: docker build -t supdude/cicd-pipeline .
+      run: docker build -t devopstest2024/ecs-poc-repo .
     - name: Push to Dockerhub
-      run: docker push supdude/cicd-pipeline:latest
+      run: docker push devopstest2024/ecs-poc-repo:latest
     - name: Pull Docker image
-      run: sudo docker pull supdude/cicd-pipeline:latest
+      run: sudo docker pull devopstest2024/ecs-poc-repo:latest
     - name: Run Docker Container
-      run: sudo docker run -d -p 8080:8080 --name cicd-pipeline-container supdude/cicd-pipeline
+      run: sudo docker run -d -p 8080:8080 --name ecs-poc-repo-container devopstest2024/ecs-poc-repo
