@@ -1,0 +1,42 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+
+  build:
+
+    runs-on: TR-GitHub-ECS
+    
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+    
+    # - uses: actions/checkout@v3
+    # - name: Login Dockerhub
+    #   env:
+    #     DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+    #     DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+    #   run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+    # - name: Pull Docker image
+    #   run: sudo docker pull supdude/cicd-pipeline:latest
+
+
+    #- name: Delete Old docker container
+    #  run: sudo docker rm -f cicd-pipeline-container || true
+    #- name: Run Docker Container
+    #  run: sudo docker run -d -p 8080:8080 --name cicd-pipeline-container supdude/cicd-pipeline
