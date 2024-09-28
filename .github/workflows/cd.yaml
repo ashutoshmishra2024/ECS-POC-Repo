@@ -15,7 +15,7 @@ jobs:
     
     steps:
 
-    - name: Checkout repository
+    - name: Checkout source repository
       uses: actions/checkout@v2
 
     - name: Set up Node.js
@@ -33,11 +33,23 @@ jobs:
          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
       run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
-    - name: Pull Docker image
-      run: sudo docker pull devopstest2024/ecs-poc-repo:latest
+    - name: Build the docker image
+      run: docker build -t devopstest2024/ecs-poc-repo .
 
+    - name: Publish the Docker image into docker hub
+      run: docker push devopstest2024/ecs-poc-repo:latest
 
-    - name: Delete Old docker container
-      run: sudo docker rm -f ecs-poc-repo-container || true
-    - name: Run Docker Container
-      run: sudo docker run -d -p 8080:8080 --name ecs-poc-repo-container devopstest2024/ecs-poc-repo
+  deploy:
+   needs: build
+  
+   runs-on: TR-GitHub-ECS
+   steps: 
+
+     - name: Pull image from docker hub
+       run: docker pull devopstest2024/ecs-poc-repo:latest
+
+     - name: Delete Old docker container
+       run: docker rm -f ecs-poc-repo-container || true
+       
+     - name: run docker container   
+     - run: sudo docker run -d -p 8080:8080 --name ecs-poc-repo-container devopstest2024/ecs-poc-repo:latest
