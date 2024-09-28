@@ -5,7 +5,7 @@
  
  # input GitHub runner version argument
 
- ARG RUNNER_VERSION
+ ARG RUNNER_VERSION 2.319.1
 
 # ENV DEBIAN_FRONTEND=noninteractive
  
