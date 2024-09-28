@@ -25,6 +25,9 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+
+    - name: build project
+      run: mvn clean install -DskipTests
     
       # uses: actions/checkout@v3
     - name: Login Dockerhub
