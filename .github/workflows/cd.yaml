@@ -12,7 +12,7 @@ jobs:
 
   build:
 
-    runs-on: TR-GitHub-ECS
+    runs-on: [self-hosted, linux]
     
     steps:
 
