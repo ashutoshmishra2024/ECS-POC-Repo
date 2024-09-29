@@ -1,72 +1,32 @@
- FROM node:16
-
-# # Create app directory
- WORKDIR /usr/src/app
-
-
-# # Install app dependencies
-# # A wildcard is used to ensure both package.json AND package-lock.json are copied
-# # where available (npm@5+)
- COPY package*.json ./
-
- RUN npm install
-# # If you are building your code for production
- RUN npm ci --only=production
-
-# # Bundle app source
- COPY . .
-
- EXPOSE 8080
- CMD [ "node", "server.js" ]
-
-# base image
+# Dockerfile for self-hosted runner with Ubuntu 20.04
 
 FROM ubuntu:20.04
- 
 
-#input GitHub runner version argument
+# Install dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    sudo \
+    unzip \
+    iputils-ping \
+    && rm -rf /var/lib/apt/lists/*
 
-ARG RUNNER_VERSION=2.319.1
+# Working directory
+WORKDIR /runner
 
-ENV RunnerVersion=2.319.1
+# Install GitHub Actions Runner
+ARG RUNNER_VERSION="2.304.0"
+ARG RUNNER_CHECKSUM="292e8770bdeafca135c2c06cd5426f9dda49a775568f45fcc25cc2b576afc12f"
 
-ENV DEBIAN_FRONTEND=noninteractive
+RUN curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
+    && echo "292e8770bdeafca135c2c06cd5426f9dda49a775568f45fcc25cc2b576afc12f  actions-runner.tar.gz" | sha256sum -c - \
+    && tar xzf ./actions-runner.tar.gz \
+    && rm actions-runner.tar.gz
 
-LABEL BaseImage="ubuntu:20.04"
+# Copy entrypoint script and make it executable
+COPY entrypoint.sh .
+RUN chmod +x ./entrypoint.sh
 
-LABEL RunnerVersion=${RUNNER_VERSION}
- 
-# update the base packages + add a non-sudo user
-
-RUN apt-get update -y && apt-get upgrade -y && useradd -m docker
- 
-# install the packages and dependencies along with jq so we can parse JSON (add additional packages as necessary)
-
-RUN apt-get install -y --no-install-recommends \
-    curl nodejs wget unzip vim git azure-cli jq build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip
- 
-# cd into the user directory, download and unzip the github actions runner
-
-RUN cd /home/docker && mkdir actions-runner && cd actions-runner \
-&& curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
-&& tar xzf ./actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
- 
-# install some additional dependencies
-
-RUN chown -R docker ~docker && /home/docker/actions-runner/bin/installdependencies.sh
- 
-# add over the start.sh script
-
-ADD start.sh start.sh
- 
-# make the script executable
-
-RUN chmod +x start.sh
- 
-# set the user to "docker" so all subsequent commands are run as the docker user
-
-USER docker
- 
-# set the entrypoint to the start.sh script
-
-ENTRYPOINT ["./start.sh"]
+# Configure the runner
+ENTRYPOINT ["./entrypoint.sh"]
