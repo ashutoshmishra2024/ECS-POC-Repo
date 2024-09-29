@@ -25,8 +25,8 @@ RUN curl -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/
     && rm actions-runner.tar.gz
 
 # Copy entrypoint script and make it executable
-COPY entrypoint.sh .
-RUN chmod +x ./entrypoint.sh
+COPY start.sh .
+RUN chmod +x ./start.sh
 
 # Configure the runner
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["./start.sh"]
